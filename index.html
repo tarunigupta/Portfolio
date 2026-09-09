@@ -735,10 +735,9 @@ a.nav-cta:hover{transform:translateY(-2px);box-shadow:var(--sh-accent);backgroun
     <div class="head" data-reveal>
       <div class="kicker">Experience</div>
       <h2>Five years of owning the outcome.</h2>
-      <p>Every point below is written result-first. Switch the lens to see the same work framed for the role you're hiring for.</p>
     </div>
 
-    <div class="lens-bar" data-reveal style="--d:.06s">
+    <div class="lens-bar" data-reveal style="--d:.06s; display:none;"">
       <span class="lens-label">Read as</span>
       <div class="lens" id="lens" role="tablist" aria-label="Role lens">
         <span class="lens-thumb" id="lensThumb"></span>
@@ -832,8 +831,14 @@ const CONFIG = {
   phone: "+917568622205",        // with country code — used for the Call button (tel:)
   whatsapp: "917568622205",      // digits only, country code first, no + or spaces
   resumePDF: "https://drive.google.com/file/d/1q6BS3Dz4IlvAj0Wd03E3cMOib9hglL-N/view?usp=sharing",                 // paste a Google Drive / public PDF link. Leave blank to serve the CV bundled in this file.
-  photoURL: "https://drive.google.com/file/d/1p135HjQR3Xts4e0MMMhmce8yUAERYGKg/view?usp=sharing",                  // paste an image URL. Leave blank to use the photo bundled in this file.
-  workSheetCSV: "https://docs.google.com/spreadsheets/d/18FfRsEYyo1Ua9a5czdzM9bKGT53PIMa8l08kGANiPSk/edit?usp=sharing",              // paste a published Google Sheet CSV URL to take over the Work section
+  // Paste a plain Google Drive share link here — the code converts it to a direct
+  // image URL automatically. Leave blank to use the photo bundled in this file.
+  photoURL: "https://drive.google.com/file/d/1p135HjQR3Xts4e0MMMhmce8yUAERYGKg/view?usp=sharing",
+
+  // Google Sheet CSV endpoint. This is the gviz endpoint — it works with a sheet
+  // set to "Anyone with the link can view" and it sends the CORS headers a browser
+  // needs. The /edit?gid=0 URL from your address bar will NOT work here.
+  workSheetCSV: "https://docs.google.com/spreadsheets/d/18FfRsEYyo1Ua9a5czdzM9bKGT53PIMa8l08kGANiPSk/gviz/tq?tqx=out:csv&gid=0",
   gaMeasurementId: "",           // e.g. "G-XXXXXXXXXX" — leave blank to disable Google Analytics
 
   stats: [
@@ -1135,7 +1140,24 @@ document.addEventListener('DOMContentLoaded', () => {
   // "**bold**" -> <strong>bold</strong>. Content is authored in CONFIG above.
   const md = (s) => String(s).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
 
-  const PHOTO  = CONFIG.photoURL  || (BUNDLED_PHOTO.indexOf('data:')  === 0 ? BUNDLED_PHOTO  : '');
+  /* Google Drive share links (/file/d/<id>/view) are HTML pages, not images —
+     an <img src> pointed at one renders nothing. Pull the file ID out and rebuild
+     it as a thumbnail URL, which Drive serves as a real image with CORS allowed.
+     Anything that isn't a Drive link is passed straight through. */
+  function driveImage(url, size){
+    if (!url) return '';
+    url = String(url).trim();
+    if (url.indexOf('data:') === 0) return url;
+    if (url.indexOf('//') === 0) url = 'https:' + url;
+    if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+    if (url.indexOf('drive.google.com') === -1) return url;
+    const m = url.match(/\/file\/d\/([A-Za-z0-9_-]+)/) || url.match(/[?&]id=([A-Za-z0-9_-]+)/);
+    if (!m) return url;
+    return 'https://drive.google.com/thumbnail?id=' + m[1] + '&sz=w' + (size || 1600);
+  }
+
+  const BUNDLED_PHOTO_SRC = BUNDLED_PHOTO.indexOf('data:') === 0 ? BUNDLED_PHOTO : '';
+  const PHOTO  = driveImage(CONFIG.photoURL) || BUNDLED_PHOTO_SRC;
   const RESUME = CONFIG.resumePDF || (BUNDLED_RESUME.indexOf('data:') === 0 ? BUNDLED_RESUME : '');
 
   /* ---------- reveal observer ---------- */
@@ -1186,6 +1208,13 @@ document.addEventListener('DOMContentLoaded', () => {
   if (PHOTO){
     const img = document.createElement('img');
     img.src = PHOTO; img.alt = CONFIG.name; img.decoding = 'async';
+    // If the remote photo 404s or is blocked, drop back to the bundled one
+    // instead of leaving an empty frame.
+    img.onerror = function(){
+      if (BUNDLED_PHOTO_SRC && img.src !== BUNDLED_PHOTO_SRC){ img.src = BUNDLED_PHOTO_SRC; return; }
+      const initials = CONFIG.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+      portrait.innerHTML = '<div class="portrait-fallback">' + initials + '</div>';
+    };
     portrait.appendChild(img);
   } else {
     const initials = CONFIG.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
@@ -1250,9 +1279,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const filtersEl = $('#filters');
 
   function cardHTML(d){
-    const cover = d.CoverImage || d.cover
-      ? '<img src="' + (d.CoverImage || d.cover) + '" alt="">'
-      : '<div class="card-metric">' + (d.metric || d.Metric || 'TG') + '</div><div class="card-metric-l">' + (d.metricLabel || d.MetricLabel || '') + '</div>';
+    const coverSrc = driveImage(d.CoverImage || d.cover || '', 900);
+    const metricBlock = '<div class="card-metric">' + (d.metric || d.Metric || 'TG') + '</div><div class="card-metric-l">' + (d.metricLabel || d.MetricLabel || '') + '</div>';
+    // The fallback markup rides along on the element (see buildCard) so a broken
+    // cover image degrades to the metric block instead of a broken-image icon.
+    const cover = coverSrc
+      ? '<img src="' + coverSrc + '" alt="" loading="lazy" data-cover-fallback="' +
+        metricBlock.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;') + '">'
+      : metricBlock;
     const link = d.link || d.DriveLink || '';
     return '' +
       '<div class="card-cover">' + cover + '</div>' +
@@ -1275,6 +1309,12 @@ document.addEventListener('DOMContentLoaded', () => {
     el.setAttribute('data-impression-type', 'work_card');
     el.setAttribute('data-impression-label', d.title || d.Title || '');
     el.innerHTML = cardHTML(d);
+    const coverImg = el.querySelector('img[data-cover-fallback]');
+    if (coverImg){
+      coverImg.onerror = function(){
+        coverImg.parentNode.innerHTML = coverImg.getAttribute('data-cover-fallback');
+      };
+    }
     return el;
   }
 
@@ -1364,18 +1404,25 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!CONFIG.workSheetCSV){ renderWork(CONFIG.work); return; }
     renderSkeletons();
     fetch(CONFIG.workSheetCSV)
-      .then(r => { if (!r.ok) throw new Error('csv'); return r.text(); })
+      .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status + ' from the sheet URL'); return r.text(); })
       .then(text => {
+        // A sheet that isn't shared publicly returns a Google sign-in page, not CSV.
+        if (/^\s*</.test(text)) throw new Error('Got HTML, not CSV — check the sheet is shared with "Anyone with the link"');
         const rows = parseCSV(text);
-        if (rows.length < 2) throw new Error('empty');
+        if (rows.length < 2) throw new Error('Sheet parsed but has no data rows');
         const headers = rows[0].map(h => h.trim());
-        renderWork(rows.slice(1).map(r => {
+        const items = rows.slice(1).map(r => {
           const o = {};
-          headers.forEach((h, i) => o[h] = (r[i] || '').trim());
+          headers.forEach((h, i) => { if (h) o[h] = (r[i] || '').trim(); });
           return o;
-        }));
+        }).filter(o => (o.Title || o.title));   // skip blank trailing rows
+        if (!items.length) throw new Error('No rows had a Title — check your header row spelling');
+        renderWork(items);
       })
-      .catch(() => renderWork(CONFIG.work));   // sheet unreachable → fall back to bundled work
+      .catch(err => {
+        console.warn('[work] Falling back to bundled projects:', err.message);
+        renderWork(CONFIG.work);
+      });
   }
   loadWork();
 
