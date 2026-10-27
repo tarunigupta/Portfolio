@@ -786,6 +786,7 @@ a.nav-cta:hover{transform:translateY(-2px);box-shadow:var(--sh-accent);backgroun
       <a href="#about" data-section="about" data-track-cat="nav" data-track-label="about">About</a>
       <a href="#experience" data-section="experience" data-track-cat="nav" data-track-label="experience">Experience</a>
       <a href="#education" data-section="education" data-track-cat="nav" data-track-label="education">Education</a>
+      <a href="#beyond" data-section="beyond" data-track-cat="nav" data-track-label="beyond">Beyond the Résumé</a>
       <a href="#contact" class="nav-cta" data-track-cat="nav" data-track-label="contact_cta">Get in touch</a>
     </div>
     <button class="burger" id="burger" aria-label="Open menu" aria-expanded="false">
@@ -799,6 +800,7 @@ a.nav-cta:hover{transform:translateY(-2px);box-shadow:var(--sh-accent);backgroun
   <a href="#about" data-track-cat="nav_mobile" data-track-label="about">About</a>
   <a href="#experience" data-track-cat="nav_mobile" data-track-label="experience">Experience</a>
   <a href="#education" data-track-cat="nav_mobile" data-track-label="education">Education</a>
+  <a href="#beyond" data-track-cat="nav_mobile" data-track-label="beyond">Beyond the Résumé</a>
   <a href="#contact" data-track-cat="nav_mobile" data-track-label="contact">Contact</a>
 </div>
 
@@ -848,11 +850,8 @@ a.nav-cta:hover{transform:translateY(-2px);box-shadow:var(--sh-accent);backgroun
 <section id="work">
   <div class="container">
     <div class="head" data-reveal>
-      <div class="kicker">Selected Work</div>
-      <h2>Nine problems I owned end&#8209;to&#8209;end.</h2>
-      <p>Strategy, growth and execution across travel-tech, B2B exhibitions and high-volume retail, across Europe, Asia and India.</p>
+      <h2>Case Studies</h2>
     </div>
-    <div class="filters" id="filters" data-reveal style="--d:.06s"></div>
     <div class="grid" id="workGrid"></div>
   </div>
 </section>
@@ -1530,6 +1529,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function buildFilters(items){
+    if (!filtersEl) return;
     const counts = { all: items.length };
     items.forEach(d => {
       const t = String(d.type || d.Type || '').toLowerCase().trim();
@@ -1762,7 +1762,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const progress = $('#progress');
   const tlFill = $('#tlFill');
   const navLinks = $$('.nav-links a[data-section]');
-  const sections = ['work', 'about', 'experience', 'education', 'contact'].map(id => document.getElementById(id)).filter(Boolean);
+  const sections = ['work', 'about', 'experience', 'education', 'beyond', 'contact'].map(id => document.getElementById(id)).filter(Boolean);
   const portraitWrap = $('.portrait-wrap');
   const milestones = [25, 50, 75, 100];
   const fired = new Set();
