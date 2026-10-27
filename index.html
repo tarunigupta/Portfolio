@@ -772,6 +772,54 @@ a.nav-cta:hover{transform:translateY(-2px);box-shadow:var(--sh-accent);backgroun
 @media (hover:none){
   .bx-cap{display:none;}
 }
+
+/* ==========================================================
+   SOMETHING I BUILT
+   ========================================================== */
+.built{padding-top:0;}
+.built-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:40px;}
+.build{display:flex;flex-direction:column;}
+.build-shot{
+  position:relative;display:block;aspect-ratio:16/10;margin:0 12px 12px 0;
+  border-radius:14px;transition:transform .55s var(--ease);
+}
+.build-shot::before{
+  content:"";position:absolute;inset:0;border-radius:14px;
+  border:1.5px solid var(--accent);opacity:.34;transform:translate(12px,12px);
+  pointer-events:none;transition:opacity .4s var(--ease-soft);
+}
+.build-win{
+  position:absolute;inset:0;border-radius:14px;overflow:hidden;
+  background:var(--surface);box-shadow:var(--sh-sm);display:flex;flex-direction:column;
+  transition:box-shadow .55s var(--ease);
+}
+.build-bar{flex:none;height:28px;display:flex;align-items:center;gap:6px;padding:0 14px;background:var(--bg-alt);border-bottom:1px solid var(--border);}
+.build-bar i{width:8px;height:8px;border-radius:50%;background:#DAD5CC;}
+.build-bar span{margin-left:10px;font-size:11px;color:var(--muted);letter-spacing:.01em;}
+/* covers are shown whole, on each site's own background colour */
+.build-win img{flex:1;min-height:0;width:100%;object-fit:contain;}
+.build--scrollback .build-win{background:#EDEAE4;}
+.build--recess .build-win{background:#F8F9FA;}
+.build-shot:hover{transform:translateY(-5px);}
+.build-shot:hover .build-win{box-shadow:var(--sh-md);}
+.build-shot:hover::before{opacity:.55;}
+.build-shot:focus-visible{outline:2px solid var(--accent);outline-offset:4px;}
+.build-body{padding:22px 4px 0;}
+.build h3{font-size:clamp(24px,2.4vw,30px);font-weight:500;letter-spacing:-.02em;}
+.build-tag{font-family:'Playfair Display',serif;font-style:italic;font-size:17px;color:var(--accent);margin-top:6px;}
+.build-desc{font-size:15px;line-height:1.7;color:#3A4046;margin-top:12px;max-width:52ch;}
+.build-meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;}
+.build-meta span{background:var(--accent-soft);color:var(--accent-deep);font-size:11.5px;font-weight:500;padding:5px 12px;border-radius:100px;border:1px solid rgba(26,107,107,.13);}
+.build-link{display:inline-flex;align-items:center;gap:7px;margin-top:20px;font-size:14px;font-weight:600;color:var(--accent);}
+.build-link svg{width:14px;height:14px;transition:transform .35s var(--ease);}
+.build-link:hover svg{transform:translate(2px,-2px);}
+@media (max-width:860px){
+  .built-grid{grid-template-columns:1fr;gap:52px;}
+}
+@media (max-width:768px){
+  .build-shot{margin:0 8px 8px 0;}
+  .build-shot::before{transform:translate(8px,8px);}
+}
 </style>
 </head>
 <body>
@@ -782,7 +830,6 @@ a.nav-cta:hover{transform:translateY(-2px);box-shadow:var(--sh-accent);backgroun
   <div class="nav-inner">
     <a href="#top" class="nav-logo" data-track-cat="nav" data-track-label="logo">TG<i></i></a>
     <div class="nav-links" id="navLinks">
-      <a href="#work" data-section="work" data-track-cat="nav" data-track-label="work">Work</a>
       <a href="#about" data-section="about" data-track-cat="nav" data-track-label="about">About</a>
       <a href="#experience" data-section="experience" data-track-cat="nav" data-track-label="experience">Experience</a>
       <a href="#education" data-section="education" data-track-cat="nav" data-track-label="education">Education</a>
@@ -796,7 +843,6 @@ a.nav-cta:hover{transform:translateY(-2px);box-shadow:var(--sh-accent);backgroun
 </nav>
 
 <div class="sheet" id="sheet">
-  <a href="#work" data-track-cat="nav_mobile" data-track-label="work">Work</a>
   <a href="#about" data-track-cat="nav_mobile" data-track-label="about">About</a>
   <a href="#experience" data-track-cat="nav_mobile" data-track-label="experience">Experience</a>
   <a href="#education" data-track-cat="nav_mobile" data-track-label="education">Education</a>
@@ -853,6 +899,41 @@ a.nav-cta:hover{transform:translateY(-2px);box-shadow:var(--sh-accent);backgroun
       <h2>Case Studies</h2>
     </div>
     <div class="grid" id="workGrid"></div>
+  </div>
+</section>
+
+<section id="built" class="built" aria-labelledby="builtTitle">
+  <div class="container">
+    <div class="head" data-reveal>
+      <h2 id="builtTitle">Something I Built</h2>
+      <p>Ideas I couldn't stop thinking about, so I built them.</p>
+    </div>
+    <div class="built-grid">
+      <article class="build build--scrollback" data-reveal style="--d:.04s">
+        <a class="build-shot" href="https://scrollback.in/" target="_blank" rel="noopener" aria-label="Visit Scrollback (opens in a new tab)" data-track-cat="built" data-track-label="scrollback_shot">
+          <span class="build-win"><span class="build-bar" aria-hidden="true"><i></i><i></i><i></i><span>scrollback.in</span></span><img src="images/built/scrollback.webp" alt="Scrollback homepage" decoding="async"></span>
+        </a>
+        <div class="build-body">
+          <h3>Scrollback</h3>
+          <p class="build-tag">Your chat, as a story.</p>
+          <p class="build-desc">Drop in a WhatsApp chat and get a funny, slightly too honest story: who texts first, who leaves who on read, and what you send at 3 a.m.</p>
+          <div class="build-meta"><span>Web app</span><span>Privacy-first</span><span>Live</span></div>
+          <a class="build-link" href="https://scrollback.in/" target="_blank" rel="noopener" data-track-cat="built" data-track-label="scrollback_visit">Visit live site<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+        </div>
+      </article>
+      <article class="build build--recess" data-reveal style="--d:.12s">
+        <a class="build-shot" href="https://recessgamearea.lovable.app/" target="_blank" rel="noopener" aria-label="Visit Recess (opens in a new tab)" data-track-cat="built" data-track-label="recess_shot">
+          <span class="build-win"><span class="build-bar" aria-hidden="true"><i></i><i></i><i></i><span>recessgamearea.lovable.app</span></span><img src="images/built/recess.png" alt="Recess homepage" decoding="async"></span>
+        </a>
+        <div class="build-body">
+          <h3>Recess</h3>
+          <p class="build-tag">A quick mind refresh, between everything else.</p>
+          <p class="build-desc">Short, nostalgic games like Stapu, Kho Kho and Book Cricket, made for the ten-minute gap between meetings or classes.</p>
+          <div class="build-meta"><span>Web app</span><span>Multiplayer</span><span>Live</span></div>
+          <a class="build-link" href="https://recessgamearea.lovable.app/" target="_blank" rel="noopener" data-track-cat="built" data-track-label="recess_visit">Visit live site<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+        </div>
+      </article>
+    </div>
   </div>
 </section>
 
